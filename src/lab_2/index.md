@@ -3,7 +3,14 @@ title: "Lab 2: Subway Staffing"
 toc: true
 ---
 <h2> NYC Transit Authority: 2025 Ridership Trends & 2026 Staffing Intel </h2>
-
+<style>
+h3 { background-color: #f0e6f6;
+  color: rebeccapurple;
+  padding: 15px 20px;
+  border-radius: 5px;
+  border-left: 5px solid rebeccapurple;
+  }
+</style>
 
 <!-- Import Data -->
 ```js

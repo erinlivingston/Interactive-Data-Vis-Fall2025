@@ -44,15 +44,18 @@ const currentStaffing = {
   "Astor Pl": 7
 }
 ```
-Here I would like to have a brief introduction to the report.
-Could also add key takeaways for the entire report up front.
+
 
 
   <h3>Part I: Overall Ridership: Impact of Fare Increase & Local Events by Station</h3>
 
   The chart below shows total daily ridership (entrances + exists) across all NYC subway stations in the dataset. This runs from June through mid-August 2025. The orange dashed line marks July 15th, when fares increased from $2.75 to $3.00. 
 
-  Use the dropdwon to examin individual stations and their corresponding events, which are shown as dots. **The aggregate view reveals a clear ridership decline following the fare increase.** Event level impacts are more subtle at this scale, but at specific stations, like 86th street, you can observe ridership peaks coinciding with major events like a June fireworks display.
+  Use the dropdwon to examine individual stations and their corresponding events, which are noted on the ridership line as orange dots. 
+  
+  **The aggregate view 'All Stations' reveals a clear ridership decline following the fare increase.** 
+  
+  Note that event level impacts are more subtle, so event dots are removed from the 'All Stations' view. Toggle to specific stations to examine if event dots correspond with peaks in ridership. For example, viewing 86th street ridership peaks coinciding with a major June fireworks display.
 
 <!-- Running an array to get unique values of station names for a dropdown -->
 ```js
@@ -86,7 +89,7 @@ const filteredRidership = selectedStation === "All Stations"
   : ridership.filter(d => d.station === selectedStation);
 
 const filteredEvents = selectedStation === "All Stations"
-  ? local_events
+  ? [] //no events to show for all stations mode
   : local_events.filter(d => d.nearby_station === selectedStation);
 ```
 
@@ -113,14 +116,33 @@ Plot.plot({
         { y: "sum" },
         {x: "date", y: d => d.entrances + d.exits,}
       )
-    ), Plot.dot(filteredEvents, {
+    ), 
+    
+     // Event dots positioned at ridership values
+    Plot.dot(filteredEvents, {
       x: "date",
+      y: eventData => {
+        // Find the ridership total for this event's date and station
+        const matchingRidership = filteredRidership.filter(r => 
+          r.date.toDateString() === eventData.date.toDateString() &&
+          r.station === eventData.nearby_station
+        );
+        
+        // Sum entrances + exits for this date
+        const total = matchingRidership.reduce((sum, r) => sum + r.entrances + r.exits, 0);
+        
+        return total || 0; // Return 0 if no matching data
+      },
+      r: 3,
+      fill: "orange",
+      fillOpacity: 0.7,
+      stroke: "black",
       tip: true, 
-      channels: {"Event":"event_name"}
-      // add data object code for y valye here so event data knows ridership?
+      channels: {"Event": "event_name"}
     }),
 
-     //mark annotation of fair increase on July 15th
+
+    //mark annotation of fair increase on July 15th
     Plot.ruleX([fareUpdate], {
       stroke: "orange",
       strokeWidth: 2, 

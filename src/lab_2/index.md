@@ -54,15 +54,14 @@ const currentStaffing = {
 
 
 
-  <h3>Part I: Overall Ridership: Impact of Fare Increase & Local Events by Station</h3>
+  <h3>Part I: Ridership Impact from Fare Increase & Local Events</h3>
 
-  The chart below shows total daily ridership (entrances + exists) across all NYC subway stations in the dataset. This runs from June through mid-August 2025. The orange dashed line marks July 15th, when fares increased from $2.75 to $3.00. 
-
-  Use the dropdwon to examine individual stations and their corresponding events, which are noted on the ridership line as orange dots. 
+  The chart below shows total daily ridership (entrances + exists) across all NYC subway stations in the dataset. This runs from June through mid-August 2025. Use the dropdwon to examine individual stations and their corresponding events, which are noted on the ridership line as orange dots. 
   
-  **The aggregate view 'All Stations' reveals a clear ridership decline following the fare increase.** 
+  **The aggregate view 'All Stations' reveals a clear ridership decline following the fare increase.** The average ridership change following the fare increase was **${fareImpact}%**.
   
-  Note that event level impacts are more subtle, so event dots are removed from the 'All Stations' view. Toggle to specific stations to examine if event dots correspond with peaks in ridership. For example, viewing 86th street ridership peaks coinciding with a major June fireworks display.
+  *Note: Local event level impacts on ridership are station specific, so event dots are removed from the 'All Stations' view.*
+  
 
 <!-- Running an array to get unique values of station names for a dropdown -->
 ```js
@@ -168,6 +167,17 @@ Plot.plot({
   ]
 })
 ```
+Specific station views show how event dots correspond with peaks in ridership. For example, viewing 86th street ridership peaks coinciding with a major June fireworks display.
+
+Other significant ridership peaks are seen at: 
+
+- Pride Parade & Gallery Opening near Chambers St. 
+- Comedy Show near Houston St. 
+- Shakespeare in the Park, Gallery Opening, and Summer Concert Series near 50th St. 
+- Baseball game near 72nd St. 
+- Summer Concert Series near 34th St. Penn Station 
+
+
 
 <h3>Station Differences: Week-over-Week Ridership</h3> 
 
@@ -461,14 +471,15 @@ Plot.plot({
 
 ```
 
-<h4>Key observations:</h4>
+<h4>How to best read this,</h4>
 
-- **Purple cells** indicate ridership decreases compared to the previous week
-- **Orange cells** indicate ridership increases
-- **Black dots** mark weeks when events occurred as noted in 'nearby station' data
-- The **vertical black line** marks the week of July 15th fare increase
+- **Purple cells** indicate ridership decreases compared to the previous week & **Orange cells** indicate ridership increases
+- **Black dots** mark weeks when events occurred as noted in 'nearby station' data, use the tool tip to see more. 
+- The **vertical black line** marks July fare increase
 
-Across nearly all stations, the week of July 15th shows purple, demonstrating the immediate impact of decreased ridership corresponding with fare increase. Stations with the largest dips include 14th street (-36%), 72nd street (-31%), and West 4 St-Wash Sq (-23%). The average ridership change following the fare increase was **${fareImpact}%**.
+Across nearly all stations, the week of July 15th shows purple, demonstrating the immediate impact of decreased ridership corresponding with fare increase. Stations with the largest dips include 14th street (-36%), 72nd street (-31%), and West 4 St-Wash Sq (-23%). 
+
+The descending order of ridership volume is also revealed in the opacity of rectangle colors. Stations with less ridership up top have muted colors and less volatile week-over-week ridership changes. Those at the bottom see more fluctuation due to their high volume of riders. 
 
 <h4>Local Event Impact on Ridership</h4>
 
@@ -477,7 +488,9 @@ In contrast, weeks with events, especially at high-traffic stations, tend to sho
 
 <h3>Part II: Incident Data & Response Time by Station</h3>
 
-  The scatter plot below shows average response time to incidents across all 25 subway stations. Use the drop down to filter by incident severity. Each dot represents a station, positioned by total incidents versus avg. response time. The dashed lines serve as a median quadrant lines to benchmark performance. 
+  The scatter plot below shows average response time to incidents across all 25 subway stations. Each dot represents a station, positioned by total incidents versus avg. response time. The dashed lines serve as a median quadrant lines to benchmark performance. Use the drop down to filter by incident severity. 
+
+  How to use this as station assessment, 
   
   Stations situated in the upper right corner, above both dashed lines, face the most challenge, a high number of incidents combined with slow response times. These stations could be priority for increased staffing efforts.
 
@@ -516,6 +529,10 @@ const stationData = Array.from(stationIncidentStats, ([station, stats]) => ({
 // Calculate medians for quadrant lines
 const medianIncidents = d3.median(stationData, d => d.incident_count);
 const meanResponseTime = d3.mean(stationData, d => d.avg_response_time);
+
+// Get the max values for the quadrant
+const maxIncidents = d3.max(stationData, d => d.incident_count);
+const maxResponseTime = d3.max(stationData, d => d.avg_response_time);
 ```
 
 ```js
@@ -547,6 +564,23 @@ Plot.plot({
       stroke: "gray",
       strokeDasharray: "4,4",
       strokeWidth: 1.5
+    }),
+
+    Plot.rect([{
+      x1: medianIncidents,
+      x2: maxIncidents,
+      y1: meanResponseTime,
+      y2: maxResponseTime
+    }], {
+      x1: "x1",
+      x2: "x2",
+      y1: "y1",
+      y2: "y2",
+      fill: "red",
+      fillOpacity: 0.1,
+      stroke: "red",
+      strokeWidth: 2,
+      strokeDasharray: "4,4"
     }),
     
     // Scatter plot - dot size based on average staffing
@@ -626,7 +660,9 @@ Stations with the fastest are:
 
 <h3>Part III: Staffing Support based on 2026 Estimated Event Attendance</h3>
 
-  To identify which stations need additional staffing for the 2026 event calculator this chart examines average event attendance per staff member for each station. This metric is used to help estimate workload while accounting for both the size and frequency of events. Stations with more small events, and those with fewer larger ones are evaluated against one-another based on workload relevent to current staffing levels. 
+  To identify which stations need additional staffing for the 2026 event calculator this chart examines average event attendance per staff member for each station. 
+  
+  This metric is used *to help estimate workload* while accounting for both the size and frequency of events. Stations with more small events, and those with fewer larger ones are evaluated against one-another based on workload relevent to current staffing levels. 
 
 
 
